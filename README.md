@@ -1,6 +1,6 @@
 # Linguistique de corpus • LNG-2108 (Branche de Matéo)
 
-> [!NOTE]
+> [!CAUTION]
 > Dans cette branche je ne changerai rien, sauf que j'ajouterai mes notes de cours et mes exercices.
 > Si vous vous trouvez sur ce *repo* par accident, retournez [ici](https://github.com/guilhermegarcia/LNG2108.git)!
 
