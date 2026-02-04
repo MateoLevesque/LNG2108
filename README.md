@@ -1,4 +1,4 @@
-# Linguistique de corpus • LNG-2108
+# Linguistique de corpus • LNG-2108 (Branche de Matéo)
 
 Responsables du cours : _Bruno Courbon_ et [_Guilherme D. Garcia_](https://fr.gdgarcia.ca)
 
