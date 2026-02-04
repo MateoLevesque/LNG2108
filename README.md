@@ -1,5 +1,10 @@
 # Linguistique de corpus • LNG-2108 (Branche de Matéo)
 
+> [!NOTE]
+> Dans cette branche je ne changerai rien, sauf que j'ajouterai mes notes de cours et mes exercices.
+> Si vous vous trouvez sur ce *repo* par accident, retournez [ici](https://github.com/guilhermegarcia/LNG2108.git)!
+
+
 Responsables du cours : _Bruno Courbon_ et [_Guilherme D. Garcia_](https://fr.gdgarcia.ca)
 
 Bienvenue au dépôt Git du cours LNG-2108 à l'Université Laval
