@@ -168,7 +168,6 @@ tokens <- q12 |>
 # Calcul du nombre total de tokens.
 n_tokens <- tokens |>
   nrow()
-# [1] 475222
 
 # Calcul du nombre de tokens uniques (types).
 n_types <- tokens |>
@@ -204,7 +203,7 @@ q14 |>
   ggplot(aes(log10(ligne), log10(n))) +
   geom_point()
 
-# Pour voir la réponse, vous devez exécuter le pipeline ci-haut.
+# On utilise l'échelle log-log pour faciliter la visualisation des données. (fréquence vs ligne)
 
 # QUESTION 15
 
