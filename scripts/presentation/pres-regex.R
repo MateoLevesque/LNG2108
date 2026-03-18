@@ -1,17 +1,12 @@
 #### SETUP ####
 library(tidyverse)
-library(tidytext)
 
-phrase <- "Linguistique de corpus."
-
-mots <- phrase
-mots
+mots <- "Linguistique de corpus."
 
 # Standardisation et nettoyage
 mots <- mots |>
   str_to_lower() |>
-  str_replace_all(pattern = "[:punct:]", replacement = "")
-
+  str_replace_all("[:punct:]", "")
 mots
 
 # k
@@ -44,8 +39,7 @@ mots <- mots |>
   str_replace_all("r", "ʁ")
 mots
 
-# SW
+# ə
 mots <- mots |>
-  str_replace_all("e", "SW")
-
+  str_replace_all("e", "ə")
 mots
