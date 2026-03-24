@@ -153,17 +153,8 @@ freq_relative <- inner_join(
 
 # max
 freq_relative |>
-  arrange(desc(freq_rel)) |>
-  slice(1)
-#   title                        freq_rel
-# 1 La Maison du Chat-qui-pelote 0.000409
-
+  arrange(desc(freq_rel))
 # min
-freq_relative |>
-  arrange(freq_rel) |>
-  slice(1)
-#   title        freq_rel
-# 1 Contes bruns 0.000139
 
 # TÂCHE 6
 
@@ -180,37 +171,8 @@ calcul_entropie <- sans_sw |>
     entropie = entropie(n)
   )
 
-# max
 calcul_entropie |>
-  arrange(desc(entropie)) |>
-  slice(1)
-#   title                                                   entropie
-#   La Comédie humaine - Volume 16. Études philosophiques …     12.7
-
-# min
-calcul_entropie |>
-  arrange(entropie) |>
-  slice(1)
-#   title                        entropie
-#   La Maison du Chat-qui-pelote     11.1
-
-# plot
-
-ttr_ent <- inner_join(
-  calcul_entropie,
-  ttr_par_oeuvres,
-  by = "title"
-)
-
-ttr_ent |>
-  mutate(ttrx100 = ttr * 100) |>
-  pivot_longer(
-    cols = c(entropie, ttrx100),
-    names_to = "var", values_to = "val"
-  ) |>
-  ggplot(aes(x = title, y = val, fill = var)) +
-  geom_col(position = "dodge") +
-  scale_x_discrete(labels = ~ str_trunc(.x, width = 35)) +
-  labs(x = "Titres", y = "Valeurs", fill = "Variables") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  summarise(
+    max = max(entropie),
+    min = min(entropie)
+  )
