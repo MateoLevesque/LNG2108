@@ -1,8 +1,10 @@
 library(tidyverse)
 library(tidytext)
+library(stopwords)
 
 # On doit importer le fichier RData pour balzac
 load("../../exposes/balzac.RData")
+
 
 # Nettoyage de la colonne text
 balzac_nett <- balzac |>
@@ -19,7 +21,9 @@ balzac_nett <- balzac |>
 balzac_nett
 
 tokens <- balzac_nett |>
-  unnest_tokens(mot, texte_nett)
+  unnest_tokens(mot, text)
+
+tokens
 
 types <- tokens |>
   distinct(mot)
@@ -38,9 +42,7 @@ etendue_temps <- balzac |> distinct(year)
 #    year
 #   <dbl>
 # 1  1833
-# 2  1832
-# 3  1830
-# 4  1842
+# 2  1832 3  1830 4  1842
 
 ttr_total <- n_types / n_tokens
 # [1] 0.01561866
@@ -65,4 +67,115 @@ ttr_par_oeuvres <- inner_join(
 #  9 La Comédie humaine - Volume 07. Scènes de la vie de Province - Tome 03 0.0870
 # 10 La Comédie humaine - Volume 08. Scènes de la vie de Province - Tome 04 0.0771
 
+ttr_par_oeuvres |>
+  print(n = 21)
+
 # TÂCHE 3
+
+# ajout des stopwords
+sw <- stopwords("fr", source = "stopwords-iso")
+
+sans_sw <- tokens |>
+  filter(!mot %in% sw)
+
+sans_sw |>
+  count(mot, sort = TRUE) |>
+  slice_max(n, n = 20)
+#    mot          n
+#  1 monsieur 10928
+#  2 femme    10265
+#  3 madame    9950
+#  4 homme     9788
+#  5 faire     7282
+#  6 vie       6312
+#  7 jeune     5272
+#  8 fille     5055
+#  9 père      4964
+# 10 moment    4655
+# 11 mère      4609
+# 12 amour     4449
+# 13 jamais    4340
+# 14 francs    4212
+# 15 yeux      4188
+# 16 voir      4181
+# 17 répondit  4130
+# 18 temps     4077
+# 19 monde     3924
+# 20 grand     3922
+
+
+# TÂCHE 4
+
+# Plot loi de Zipf
+tokens |>
+  count(mot, name = "freq", sort = TRUE) |>
+  mutate(
+    rang = row_number()
+  ) |>
+  ggplot(aes(x = rang, y = freq)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+
+
+# TÂCHE 5
+
+# 1) j'ai choisi de cibler les mots finissant par -ième
+# voici donc le patron que j'utiliserai.
+patron <- "\\b.+ième\\b"
+
+# 2)
+freq_relative <- inner_join(
+  tokens |>
+    count(title, name = "n_tokens"),
+  tokens |>
+    filter(str_detect(mot, patron)) |>
+    count(title, name = "n_occ"),
+  by = "title"
+) |>
+  mutate(
+    freq_rel = n_occ / n_tokens
+  ) |>
+  select(title, freq_rel)
+#    title                                                                  freq_rel
+#  1 Contes bruns                                                           0.000139
+#  2 Eugénie Grandet                                                        0.000149
+#  3 La Comédie humaine - Volume 01                                         0.000252
+#  4 La Comédie humaine - Volume 02                                         0.000198
+#  5 La Comédie humaine - Volume 03                                         0.000147
+#  6 La Comédie humaine - Volume 04                                         0.000296
+#  7 La Comédie humaine - Volume 05. Scènes de la vie de Province - Tome 01 0.000263
+#  8 La Comédie humaine - Volume 06. Scènes de la vie de Province - Tome 02 0.000302
+#  9 La Comédie humaine - Volume 07. Scènes de la vie de Province - Tome 03 0.000194
+# 10 La Comédie humaine - Volume 08. Scènes de la vie de Province - Tome 04 0.000325
+
+# 3)
+
+freq_relative |>
+  summarise(
+    max = max(freq_rel),
+    min = min(freq_rel)
+  )
+#  max         min
+#  0.000409    0.000139
+
+# TÂCHE 6
+
+entropie <- function(freq) {
+  p <- freq / sum(freq)
+  p <- p[p > 0]
+  -sum(p * log2(p))
+}
+
+calcul_entropie <- sans_sw |>
+  group_by(title) |>
+  count(mot) |>
+  summarise(
+    entropie = entropie(n)
+  )
+
+calcul_entropie |>
+  summarise(
+    max = max(entropie),
+    min = min(entropie)
+  )
