@@ -59,23 +59,31 @@ types <- tokens |>
 # 10 balzac
 
 # Statistiques de base
+
 n_tokens <- nrow(tokens)
-# [1] 4533294
+# Il y a 4533294 tokens
+
 n_types <- nrow(types)
-# [1] 70804
+# Il y a 70804 types
+
 n_oeuvres <- n_distinct(balzac$title)
-# [1] 21
+# Il y a 21 oeuvres
 
-etendue_temps <- balzac |> distinct(year)
-# # A tibble: 4 × 1
-#    year
-#   <dbl>
-# 1  1833
-# 2  1832 3  1830 4  1842
+etendue_temps <- balzac |>
+  distinct(year) |>
+  summarise(
+    premiere_annee_publication = min(year),
+    derniere_annee_publication = max(year)
+  )
+# A tibble: 1 × 2
+# premiere_annee_publication    derniere_annee_publication
+# 1830                          1842
 
+# calcul du TTR total
 ttr_total <- n_types / n_tokens
-# [1] 0.01561866
+# Le TTR total est de 0.01561866
 
+# calcul du TTR par oeuvres
 ttr_par_oeuvres <- inner_join(
   tokens |> count(title, name = "n_tokens"),
   tokens |> distinct(title, mot) |> count(title, name = "n_types"),
@@ -83,30 +91,22 @@ ttr_par_oeuvres <- inner_join(
 ) |>
   mutate(ttr = n_types / n_tokens) |>
   select(title, ttr)
-#    title                                                                     ttr
-#    <chr>                                                                   <dbl>
-#  1 Contes bruns                                                           0.0485
-#  2 Eugénie Grandet                                                        0.128
-#  3 La Comédie humaine - Volume 01                                         0.0811
-#  4 La Comédie humaine - Volume 02                                         0.0837
-#  5 La Comédie humaine - Volume 03                                         0.0806
-#  6 La Comédie humaine - Volume 04                                         0.0767
-#  7 La Comédie humaine - Volume 05. Scènes de la vie de Province - Tome 01 0.0803
-#  8 La Comédie humaine - Volume 06. Scènes de la vie de Province - Tome 02 0.0808
-#  9 La Comédie humaine - Volume 07. Scènes de la vie de Province - Tome 03 0.0870
-# 10 La Comédie humaine - Volume 08. Scènes de la vie de Province - Tome 04 0.0771
 
+# pour visualiser le TTR par oeuvre en entier, exécutez la ligne suivante
 ttr_par_oeuvres |>
   print(n = 21)
 
+
 # TÂCHE 3
 
-# ajout des stopwords
+# Ajout des stopwords dans la variable `sw`
 sw <- stopwords("fr", source = "stopwords-iso")
 
+# Retrait des mots à faible valeur référentielle dans le corpus tokenisé
 sans_sw <- tokens |>
   filter(!mot %in% sw)
 
+# Identification des 20 mots les plus fréquents
 sans_sw |>
   count(mot, sort = TRUE) |>
   slice_max(n, n = 20)
@@ -132,10 +132,11 @@ sans_sw |>
 # 19 monde     3924
 # 20 grand     3922
 
+# TODO: Interprétation 2-3 ph
 
 # TÂCHE 4
 
-# Plot loi de Zipf
+# Visualisation du la loi de Zipf
 tokens |>
   count(mot, name = "freq", sort = TRUE) |>
   mutate(
@@ -146,10 +147,11 @@ tokens |>
   scale_x_log10() +
   scale_y_log10()
 
+# TODO: Loi de zipf ?
 
 # TÂCHE 5
 
-# 1) j'ai choisi de cibler les mots finissant par -ième
+# 1) J'ai choisi de cibler les mots finissant par -ième
 # voici donc le patron que j'utiliserai.
 patron <- "\\b.+ième\\b"
 

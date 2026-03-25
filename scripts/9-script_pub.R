@@ -1,7 +1,7 @@
 # LNG-2108 : Linguistique de corpfs
 # Séance 9 — Préparation de données textuelles
 # Script accompagnant les diapos
-
+library(Fonology)
 library(tidyverse)
 library(tidytext)
 library(stopwords)
@@ -14,7 +14,7 @@ entropie <- function(freq) {
 
 # Q: Pratique finale avec monte_cristo.RData
 
-load("donnees/monte_cristo.RData")
+load("../donnees/monte_cristo.RData")
 
 # Q: Nettoyez le texte
 # Q: Extrayez tous les mots en -tion
@@ -85,7 +85,7 @@ cumsum(lignes)
 
 
 # Q: Chargez proust.RData et préparez les données.
-load("donnees/proust.Rdata")
+load("../donnees/proust.RData")
 pr_df <- tibble(texte = proust) |>
   mutate(
     pt_header = str_detect(texte, "^(PREMIÈRE|DEUXIÈME|TROISIÈME)"),
@@ -126,3 +126,34 @@ ttr <- tokens |>
 
 
 # NOTE: On continue la semaine prochaine
+
+pr_df |>
+  select(-pt_header) |>
+  mutate(
+    punct = texte |> str_count("[!?]"),
+    carac = texte |> str_count()
+  ) |>
+  summarise(
+    t_punct = sum(punct),
+    t_carac = sum(carac),
+    frq_rel = t_punct / t_carac,
+    frq_rel_100 = frq_rel * 100,
+    .by = partie
+  )
+
+tokens |>
+  mutate(
+    len = str_count(mot)
+  ) |>
+  filter(len >= 10) |>
+  arrange(desc(len)) |>
+  mutate(
+    ipa = ipa(mot, lg = "fr")
+  )
+#
+#
+# tokens |>
+#   mutate(
+#     ipa = ipa(mot, lg = "fr")
+#   )
+#
