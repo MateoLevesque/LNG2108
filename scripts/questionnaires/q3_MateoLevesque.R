@@ -2,34 +2,63 @@ library(tidyverse)
 library(tidytext)
 library(stopwords)
 
-# On doit importer le fichier RData pour balzac
-load("../../exposes/balzac.RData")
+# TÂCHE 1
 
+# Répondre basé sur le travail d'équipe.
 
-# Nettoyage de la colonne text
-balzac_nett <- balzac |>
-  mutate(
-    text = text |>
-      str_to_lower() |>
-      str_trim() |>
-      str_replace_all("\\s+", " ") |>
-      str_remove_all("\\d") |>
-      str_replace_all("'", " ")
-  ) |>
-  filter(str_detect(text, ".+"))
-
-balzac_nett
-
-tokens <- balzac_nett |>
-  unnest_tokens(mot, text)
-
-tokens
-
-types <- tokens |>
-  distinct(mot)
 
 # TÂCHE 2
 
+# Chargement du fichier RData pour balzac
+load("../../exposes/balzac.RData")
+
+# Nettoyage de la colonne `text`
+balzac_nett <- balzac |>
+  mutate(
+    text = text |>
+      str_to_lower() |> # conversion des majuscules en minuscules
+      str_trim() |> # suppression des espaces et tabulations superflux
+      str_replace_all("\\s+", " ") |> # simplification des espaces
+      str_remove_all("\\d") |> # suppression des chiffres
+      str_replace_all("'", " ") # remplacement des apostrophes par des espaces
+  ) |>
+  filter(str_detect(text, ".+")) # suppression des rangées vides
+
+# pour visualiser le tibble nettoyé, utilisez la commande suivante
+balzac_nett
+
+# Tokénisation de la colonne text en mots
+tokens <- balzac_nett |>
+  unnest_tokens(mot, text)
+# Voici un aperçu du tibble tokenisé
+#  gutenberg_id title           author             year mot
+#  11049        Eugénie Grandet Balzac, Honoré de  1833 eugénie
+#  11049        Eugénie Grandet Balzac, Honoré de  1833 grandet
+#  11049        Eugénie Grandet Balzac, Honoré de  1833 scènes
+#  11049        Eugénie Grandet Balzac, Honoré de  1833 de
+#  11049        Eugénie Grandet Balzac, Honoré de  1833 la
+#  11049        Eugénie Grandet Balzac, Honoré de  1833 vie
+#  11049        Eugénie Grandet Balzac, Honoré de  1833 de
+#  11049        Eugénie Grandet Balzac, Honoré de  1833 province
+#  11049        Eugénie Grandet Balzac, Honoré de  1833 par
+#  11049        Eugénie Grandet Balzac, Honoré de  1833 honoré
+
+# Détermination des types
+types <- tokens |>
+  distinct(mot)
+#    mot
+#  1 eugénie
+#  2 grandet
+#  3 scènes
+#  4 de
+#  5 la
+#  6 vie
+#  7 province
+#  8 par
+#  9 honoré
+# 10 balzac
+
+# Statistiques de base
 n_tokens <- nrow(tokens)
 # [1] 4533294
 n_types <- nrow(types)
