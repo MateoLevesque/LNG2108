@@ -1,34 +1,29 @@
+# Importation des librairies
 library(tidyverse)
 library(tidytext)
 library(stopwords)
 
+
 # TÂCHE 1
 
-# Répondre basé sur le travail d'équipe.
+# Pour l'exposé oral, nous avons décidé de séparer notre équipe
+# en 2 sous-équipes. Je travaillerai avec Benjamin Floirat pour
+# analyser le sujet numéro 3. Je me chargerai principalement
+# d'élaborer et d'expliquer le code que nous aurons rédigé
+# pour analyser et répondre au sujet. J'apporterai également
+# mon soutien pour l'interprétation des résultats.
 
 
 # TÂCHE 2
 
-# Chargement du fichier RData pour balzac
+# Chargement du fichier RData pour Balzac
 load("../../exposes/balzac.RData")
 
-# Nettoyage de la colonne `text`
-balzac_nett <- balzac |>
+# Tokenisation de la colonne text en mots
+tokens <- balzac |>
   mutate(
-    text = text |>
-      str_to_lower() |> # conversion des majuscules en minuscules
-      str_trim() |> # suppression des espaces et tabulations superflux
-      str_replace_all("\\s+", " ") |> # simplification des espaces
-      str_remove_all("\\d") |> # suppression des chiffres
-      str_replace_all("'", " ") # remplacement des apostrophes par des espaces
+    text = text |> str_replace_all("'", " ")
   ) |>
-  filter(str_detect(text, ".+")) # suppression des rangées vides
-
-# pour visualiser le tibble nettoyé, utilisez la commande suivante
-balzac_nett
-
-# Tokénisation de la colonne text en mots
-tokens <- balzac_nett |>
   unnest_tokens(mot, text)
 # Voici un aperçu du tibble tokenisé
 #  gutenberg_id title           author             year mot
@@ -61,13 +56,13 @@ types <- tokens |>
 # Statistiques de base
 
 n_tokens <- nrow(tokens)
-# Il y a 4533294 tokens
+# Il y a 4 537 416 tokens
 
 n_types <- nrow(types)
-# Il y a 70804 types
+# Il y a 71 623 types
 
 n_oeuvres <- n_distinct(balzac$title)
-# Il y a 21 oeuvres
+# Il y a 21 œuvres
 
 etendue_temps <- balzac |>
   distinct(year) |>
@@ -75,15 +70,14 @@ etendue_temps <- balzac |>
     premiere_annee_publication = min(year),
     derniere_annee_publication = max(year)
   )
-# A tibble: 1 × 2
 # premiere_annee_publication    derniere_annee_publication
 # 1830                          1842
 
-# calcul du TTR total
+# Calcul du TTR total
 ttr_total <- n_types / n_tokens
-# Le TTR total est de 0.01561866
+# Le TTR total est de 0,01578498
 
-# calcul du TTR par oeuvres
+# Calcul du TTR par œuvres
 ttr_par_oeuvres <- inner_join(
   tokens |> count(title, name = "n_tokens"),
   tokens |> distinct(title, mot) |> count(title, name = "n_types"),
@@ -92,7 +86,7 @@ ttr_par_oeuvres <- inner_join(
   mutate(ttr = n_types / n_tokens) |>
   select(title, ttr)
 
-# pour visualiser le TTR par oeuvre en entier, exécutez la ligne suivante
+# Pour visualiser le TTR par œuvre en entier, exécutez la ligne suivante
 ttr_par_oeuvres |>
   print(n = 21)
 
@@ -132,11 +126,16 @@ sans_sw |>
 # 19 monde     3924
 # 20 grand     3922
 
-# TODO: Interprétation 2-3 ph
+# Ces mots nous montrent que l'auteur semble aborder des thèmes
+# comme la famille avec des mots comme *jeune, mère, père, fille*
+# et les relations avec des mots comme *monsieur, madame, femme, homme, vie*.
+# Ce que ces champs lexicaux prouvent, c'est que l'auteur semble proche
+# de l'humain et des relations interpersonnelles.
+
 
 # TÂCHE 4
 
-# Visualisation du la loi de Zipf
+# Visualisation de la loi de Zipf
 tokens |>
   count(mot, name = "freq", sort = TRUE) |>
   mutate(
@@ -147,15 +146,24 @@ tokens |>
   scale_x_log10() +
   scale_y_log10()
 
-# TODO: Loi de zipf ?
+# Oui, la loi de Zipf s'applique au corpus de Balzac.
+# En regardant le graphique généré par la commande précédente,
+# on peut voir que les extrémités sont plus diversifiées que
+# le centre. L'extrémité haute nous montre des données uniques
+# séparées par des espaces relativement écartés, tandis que
+# l'extrémité basse nous montre une grande quantité de données
+# qui ont des valeurs similaires.
+
 
 # TÂCHE 5
 
-# 1) J'ai choisi de cibler les mots finissant par -ième
-# voici donc le patron que j'utiliserai.
+# 1) J'ai choisi de cibler les déterminants numéraux ordinaux.
+# Pour ce faire, je ferai mon analyse sur les mots finissant par -ième.
+
+# Création du patron avec les expressions régulières
 patron <- "\\b.+ième\\b"
 
-# 2)
+# 2) Calcul de la fréquence relative par œuvres
 freq_relative <- inner_join(
   tokens |>
     count(title, name = "n_tokens"),
@@ -168,42 +176,47 @@ freq_relative <- inner_join(
     freq_rel = n_occ / n_tokens
   ) |>
   select(title, freq_rel)
-#    title                                                                  freq_rel
-#  1 Contes bruns                                                           0.000139
-#  2 Eugénie Grandet                                                        0.000149
-#  3 La Comédie humaine - Volume 01                                         0.000252
-#  4 La Comédie humaine - Volume 02                                         0.000198
-#  5 La Comédie humaine - Volume 03                                         0.000147
-#  6 La Comédie humaine - Volume 04                                         0.000296
-#  7 La Comédie humaine - Volume 05. Scènes de la vie de Province - Tome 01 0.000263
-#  8 La Comédie humaine - Volume 06. Scènes de la vie de Province - Tome 02 0.000302
-#  9 La Comédie humaine - Volume 07. Scènes de la vie de Province - Tome 03 0.000194
-# 10 La Comédie humaine - Volume 08. Scènes de la vie de Province - Tome 04 0.000325
+#    title                                                          freq_rel
+#  1 Contes bruns                                                   0.000139
+#  2 Eugénie Grandet                                                0.000149
+#  3 La Comédie humaine - Volume 01                                 0.000252
+#  4 La Comédie humaine - Volume 02                                 0.000198
+#  5 La Comédie humaine - Volume 03                                 0.000147
+#  6 La Comédie humaine - Volume 04                                 0.000295
+#  7 La Comédie humaine - Volume 05. Scènes de la vie de Province   0.000263
+#  8 La Comédie humaine - Volume 06. Scènes de la vie de Province   0.000301
+#  9 La Comédie humaine - Volume 07. Scènes de la vie de Province   0.000194
+# 10 La Comédie humaine - Volume 08. Scènes de la vie de Province   0.000325
 
-# 3)
+# 3) Présentation des extrêmes
 
-# max
 freq_relative |>
   arrange(desc(freq_rel)) |>
   slice(1)
 #   title                        freq_rel
 # 1 La Maison du Chat-qui-pelote 0.000409
 
-# min
 freq_relative |>
   arrange(freq_rel) |>
   slice(1)
 #   title        freq_rel
 # 1 Contes bruns 0.000139
 
+# Donc, l'œuvre qui présente la plus haute fréquence relative
+# est "La Maison du Chat-qui-pelote" avec 0,000409 et la plus basse
+# est "Contes bruns" avec 0,000139
+
+
 # TÂCHE 6
 
+# Déclaration de la fonction `entropie` servant à calculer l'entropie
 entropie <- function(freq) {
   p <- freq / sum(freq)
   p <- p[p > 0]
   -sum(p * log2(p))
 }
 
+# Calcul de l'entropie par œuvre
 calcul_entropie <- sans_sw |>
   group_by(title) |>
   count(mot) |>
@@ -225,14 +238,21 @@ calcul_entropie |>
 #   title                        entropie
 #   La Maison du Chat-qui-pelote     11.1
 
-# plot
+# L'œuvre avec l'entropie la plus élevée
+# est "La Comédie humaine - Volume 16. Études philosophiques …"
+# avec 12,7 et la plus basse est "La Maison du Chat-qui-pelote"
+# avec 11,1.
 
+# Représentation graphique de la comparaison entre l'entropie et le TTR.
+
+# Préparation du tableau
 ttr_ent <- inner_join(
   calcul_entropie,
   ttr_par_oeuvres,
   by = "title"
 )
 
+# Construction du graphique
 ttr_ent |>
   mutate(ttrx100 = ttr * 100) |>
   pivot_longer(
@@ -245,3 +265,8 @@ ttr_ent |>
   labs(x = "Titres", y = "Valeurs", fill = "Variables") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Les deux mesures ne semblent pas suivre une tendance similaire.
+# On peut facilement voir que l'œuvre avec le TTR (TTR * 100) le plus
+# élevé est aussi l'œuvre avec l'entropie la plus faible.
+# Donc, on ne peut pas conclure que les deux valeurs vont dans le même sens.
