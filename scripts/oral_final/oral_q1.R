@@ -43,9 +43,7 @@ etendue_temps <- balzac |>
     premiere_annee_publication = min(year),
     derniere_annee_publication = max(year)
   )
-# # A tibble: 1 × 2
 #   premiere_annee_publication derniere_annee_publication
-#                        <dbl>                      <dbl>
 # 1                       1830                       1842
 
 # Calcul du TTR total
@@ -78,10 +76,12 @@ ttr_par_oeuvres <- inner_join(
 sans_sw <- tokens |>
   filter(!mot %in% sw)
 
+sans_sw
+
 # Identification des 20 mots les plus fréquents
 sans_sw |>
   count(mot, sort = TRUE) |>
-  slice_max(n, n = 20)
+  slice_max(n, n = 10)
 
 
 # Calcul de l'entropie par œuvre
@@ -106,13 +106,6 @@ calcul_entropie |>
 #   title                        entropie
 #   La Maison du Chat-qui-pelote     11.1
 
-# L'œuvre avec l'entropie la plus élevée
-# est "La Comédie humaine - Volume 16. Études philosophiques …"
-# avec 12,7 et la plus basse est "La Maison du Chat-qui-pelote"
-# avec 11,1.
-
-# Représentation graphique de la comparaison entre l'entropie et le TTR.
-
 # Préparation du tableau
 ttr_ent <- inner_join(
   calcul_entropie,
@@ -126,15 +119,37 @@ ttr_ent |>
   pivot_longer(
     cols = c(entropie, ttrx100),
     names_to = "var", values_to = "val"
-  )
-ggplot(aes(x = title, y = val, fill = var)) +
+  ) |>
+  ggplot(aes(x = title, y = val, fill = var)) +
   geom_col(position = "dodge") +
   scale_x_discrete(labels = ~ str_trunc(.x, width = 35)) +
   labs(x = "Titres", y = "Valeurs", fill = "Variables") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# Les deux mesures ne semblent pas suivre une tendance similaire.
-# On peut facilement voir que l'œuvre avec le TTR (TTR * 100) le plus
-# élevé est aussi l'œuvre avec l'entropie la plus faible.
-# Donc, on ne peut pas conclure que les deux valeurs vont dans le même sens.
+
+
+
+# count word length
+
+
+sans_sw |>
+  mutate(length = str_count(mot)) |>
+  arrange(desc(length)) |>
+  select(mot, length) |>
+  filter(length < 20) |>
+  filter(!str_detect(mot, "_")) |>
+  distinct(mot)
+
+
+# Sortir categorie avec udpipe
+#  visualiser les donnees
+
+# calcul ttr sans les adv et sans les adverbe
+# visualiser les donnes
+
+# analyse par oeuvre selon les resultats
+
+# ttr entropie sorted by date
+
+#  meme chose mais pour entropie
