@@ -2,6 +2,7 @@
 library(tidyverse)
 library(tidytext)
 library(stopwords)
+library(udpipe)
 
 # Chargement du fichier RData pour Balzac
 load("../../exposes/balzac.RData")
@@ -15,6 +16,16 @@ entropie <- function(freq) {
   p <- p[p > 0]
   -sum(p * log2(p))
 }
+
+# # Model udpipe
+# udpipe_download_model(language = "french")
+# modele <- udpipe_load_model("french-gsd-ud-2.5-191206.udpipe")
+#
+# annotation <- udpipe_annotate(modele, balzac$text)
+# annotation |> as.data.frame() |>
+#   as_tibble() |>
+#   select(sentence, tokens, lemma, upos)
+# annotation
 
 # Tokenisation de la colonne text en mots
 tokens <- balzac |>
@@ -126,8 +137,6 @@ ttr_ent |>
   labs(x = "Titres", y = "Valeurs", fill = "Variables") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
 
 
 # count word length
