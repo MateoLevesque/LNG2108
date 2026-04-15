@@ -57,6 +57,11 @@ etendue_temps <- balzac |>
 #   premiere_annee_publication derniere_annee_publication
 # 1                       1830                       1842
 
+balzac |>
+  group_by(title) |>
+  arrange(year)
+
+
 # Calcul du TTR total
 ttr_total <- n_types / n_tokens
 # [1] 0.01578498
@@ -97,11 +102,14 @@ sans_sw |>
 
 # Calcul de l'entropie par œuvre
 calcul_entropie <- sans_sw |>
+  arrange(year) |>
   group_by(title) |>
   count(mot) |>
   summarise(
     entropie = entropie(n)
   )
+
+calcul_entropie
 
 # max
 calcul_entropie |>
@@ -141,7 +149,6 @@ ttr_ent |>
 
 # count word length
 
-
 sans_sw |>
   mutate(length = str_count(mot)) |>
   arrange(desc(length)) |>
@@ -154,7 +161,7 @@ sans_sw |>
 # Sortir categorie avec udpipe
 #  visualiser les donnees
 
-# calcul ttr sans les adv et sans les adverbe
+# calcul ttr sans les adj et sans les adverbe
 # visualiser les donnes
 
 # analyse par oeuvre selon les resultats
